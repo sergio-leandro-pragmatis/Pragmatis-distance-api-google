@@ -3,6 +3,24 @@ import googlemaps
 import pandas as pd
 import sys
 from streamlit import cli as stcli
+
+import pandas as pd
+from io import BytesIO
+import streamlit as st
+
+def to_excel(df):
+    output = BytesIO()
+    writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    df.to_excel(writer, index=False, sheet_name='Sheet1')
+    workbook = writer.book
+    worksheet = writer.sheets['Sheet1']
+    format1 = workbook.add_format({'num_format': '0.00'})
+    worksheet.set_column('A:A', None, format1)
+    writer.save()
+    processed_data = output.getvalue()
+    return processed_data
+
+
 def take_distance(local_A, local_B):
     api_key = 'AIzaSyBz6KWncEdc8LNhpBI9XmdQ973h9a6-hCY'
     # Requires API key
@@ -11,10 +29,13 @@ def take_distance(local_A, local_B):
     # Requires cities name
     my_dist = gmaps.distance_matrix(local_A, local_B)['rows'][0]['elements'][0]
 
-    dados = pd.DataFrame(my_dist)
-    dados = dados.drop('status', axis = 1)[:1]
+    distance = my_dist['distance']['text']
+    duration = my_dist['duration']['text']
 
-    return dados
+    #dados = pd.DataFrame(my_dist)
+    #dados = dados.drop('status', axis = 1)[:1]
+
+    return distance,duration
 
 def main():
     st.title("Pragmatis Consultoria - Squad Anaytics")
@@ -38,6 +59,12 @@ def main():
 
         input = st.file_uploader("Insira o input (.xlsx)", type='xlsx')
 
+        distancia_ = []
+        duracao_ = []
+        origem_ = []
+        destino_ = []
+        id_list = []
+
         if input:
             df = pd.read_excel(input)
             st.table(df)
@@ -45,10 +72,26 @@ def main():
             origem = df['origem']
             destino = df['destino']
 
-            for i in range(len(origem)):
-                st.write('Origem:', origem[i],'\nDestino:' ,destino[i])
-                st.table(take_distance(origem[i], destino[i]))
+            st.subheader('Resultados:')
 
+            for i in range(len(origem)):
+                #st.write('Origem:', origem[i],'\nDestino:' ,destino[i])
+                distancia, duracao = take_distance(origem[i], destino[i])
+
+
+                distancia_.append(distancia)
+                duracao_.append(duracao)
+                origem_.append(origem[i])
+                destino_.append(destino[i])
+                id_list.append(f'000{str(i)}GMDP')
+
+            dados_extract = {'id': id_list, 'Origem': origem_, 'Destino':destino_, 'Distância':distancia_, 'Duração':duracao_ }
+
+            df_results = pd.DataFrame(dados_extract)
+
+            st.table(dados_extract)
+
+            st.download_button(label = "📥 Download Current Result as CSV", data = df_results.to_csv(), mime = 'text/csv',file_name='Output.xlsx')
 
 if __name__ == '__main__':
     if st._is_running_with_streamlit:
