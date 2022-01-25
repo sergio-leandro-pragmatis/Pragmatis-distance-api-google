@@ -91,7 +91,7 @@ def main():
 
             st.table(dados_extract)
 
-            st.download_button(label = "📥 Download Current Result as CSV", data = df_results.to_csv(), mime = 'text/csv',file_name='Output.xlsx')
+            st.download_button(label = "📥 Download Current Result as CSV", data = df_results.to_csv(), mime = 'text/csv',file_name='Output.csv')
 
 if __name__ == '__main__':
     if st._is_running_with_streamlit:
