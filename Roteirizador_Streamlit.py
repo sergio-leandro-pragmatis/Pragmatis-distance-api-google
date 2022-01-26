@@ -9,20 +9,14 @@ from PIL import Image
 
 
 
-api_key = 'AIzaSyBz6KWncEdc8LNhpBI9XmdQ973h9a6-hCY'
-# Requires API key
-gmaps = googlemaps.Client(key='AIzaSyBz6KWncEdc8LNhpBI9XmdQ973h9a6-hCY')
 
 
-locais = pd.read_excel('input_matrix_API.xlsx')
-
-#Faz a busca e constroi a matriz
-
-"""
-
-"""
 
 def API_matrix_distance(locais):
+    api_key = 'AIzaSyBz6KWncEdc8LNhpBI9XmdQ973h9a6-hCY'
+    # Requires API key
+    gmaps = googlemaps.Client(key='AIzaSyBz6KWncEdc8LNhpBI9XmdQ973h9a6-hCY')
+
 
     origem = locais['locais_origem']
     origem = [x for x in origem if pd.isnull(x) == False]
